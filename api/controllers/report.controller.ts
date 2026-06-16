@@ -17,7 +17,8 @@ export const generateWeeklyReport = (req: AuthRequest, res: Response) => {
 export const getWeeklyReports = (req: AuthRequest, res: Response) => {
   try {
     const plantId = req.query.plantId as string;
-    let reports = reportService.getWeeklyReports();
+    const result = reportService.getWeeklyReports();
+    let reports = result.reports;
     
     if (plantId) {
       reports = reports.filter(r => r.plantId === plantId);
@@ -27,7 +28,7 @@ export const getWeeklyReports = (req: AuthRequest, res: Response) => {
     const accessiblePlantIds = new Set(accessiblePlants.map((p: any) => p.id));
     reports = reports.filter(r => accessiblePlantIds.has(r.plantId));
     
-    res.json(reports);
+    res.json({ ...result, reports });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -35,7 +36,7 @@ export const getWeeklyReports = (req: AuthRequest, res: Response) => {
 
 export const getReportById = (req: AuthRequest, res: Response) => {
   try {
-    const report = reportService.getReportById(req.params.id);
+    const report = reportService.getWeeklyReportById(req.params.id);
     if (!report) {
       return res.status(404).json({ error: '报告不存在' });
     }
@@ -66,11 +67,12 @@ export const getLatestReport = (req: AuthRequest, res: Response) => {
         return res.status(403).json({ error: '无权限访问该工厂' });
       }
       
-      const reports = reportService.getWeeklyReports().filter(r => r.plantId === plantId);
-      report = reports.sort((a, b) => new Date(b.weekEndDate).getTime() - new Date(a.weekEndDate).getTime())[0];
+      const result = reportService.getWeeklyReports();
+      const reports = result.reports.filter(r => r.plantId === plantId);
+      report = reports.sort((a, b) => new Date(b.weekEnd).getTime() - new Date(a.weekEnd).getTime())[0];
     } else {
-      const reports = reportService.getWeeklyReports();
-      report = reports.sort((a, b) => new Date(b.weekEndDate).getTime() - new Date(a.weekEndDate).getTime())[0];
+      const result = reportService.getWeeklyReports();
+      report = result.reports.sort((a, b) => new Date(b.weekEnd).getTime() - new Date(a.weekEnd).getTime())[0];
     }
     
     if (!report) {
@@ -85,7 +87,7 @@ export const getLatestReport = (req: AuthRequest, res: Response) => {
 
 export const getStatistics = (req: AuthRequest, res: Response) => {
   try {
-    const stats = reportService.getStatistics();
+    const stats = reportService.getReportStatistics();
     res.json(stats);
   } catch (error: any) {
     res.status(500).json({ error: error.message });

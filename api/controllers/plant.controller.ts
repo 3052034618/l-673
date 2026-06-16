@@ -4,9 +4,20 @@ import { AuthRequest } from '../middleware/auth.middleware.js';
 import { filterPlantsByUser, checkPlantAccess } from '../middleware/rbac.middleware.js';
 import { z } from 'zod';
 
+const regionMap: Record<string, string> = {
+  '北京市': '华北', '天津市': '华北', '河北省': '华北', '山西省': '华北', '内蒙古自治区': '华北',
+  '辽宁省': '东北', '吉林省': '东北', '黑龙江省': '东北',
+  '上海市': '华东', '江苏省': '华东', '浙江省': '华东', '安徽省': '华东', '福建省': '华东', '江西省': '华东', '山东省': '华东',
+  '河南省': '华中', '湖北省': '华中', '湖南省': '华中',
+  '广东省': '华南', '广西壮族自治区': '华南', '海南省': '华南',
+  '重庆市': '西南', '四川省': '西南', '贵州省': '西南', '云南省': '西南', '西藏自治区': '西南',
+  '陕西省': '西北', '甘肃省': '西北', '青海省': '西北', '宁夏回族自治区': '西北', '新疆维吾尔自治区': '西北'
+};
+
 const createPlantSchema = z.object({
   name: z.string().min(1, '工厂名称不能为空'),
   province: z.string().min(1, '省份不能为空'),
+  region: z.string().optional(),
   city: z.string().min(1, '城市不能为空'),
   address: z.string().optional(),
   capacity: z.number().min(1, '日处理能力必须大于0'),
@@ -86,7 +97,8 @@ export const getPlantRanking = (req: AuthRequest, res: Response) => {
 export const createPlant = (req: AuthRequest, res: Response) => {
   try {
     const validated = createPlantSchema.parse(req.body);
-    const plant = plantService.createPlant(validated);
+    const region = validated.region || regionMap[validated.province] || '未知';
+    const plant = plantService.createPlant({ ...validated, region } as any);
     res.status(201).json(plant);
   } catch (error: any) {
     if (error instanceof z.ZodError) {

@@ -11,6 +11,13 @@ import type {
   MaintenanceRecord,
 } from '../../shared/types.js';
 
+interface ForecastHistoryEntry {
+  id: string;
+  plantId: string;
+  uploadDate: string;
+  data: any[];
+}
+
 interface Database {
   users: User[];
   plants: Plant[];
@@ -22,6 +29,7 @@ interface Database {
   approvalSteps: ApprovalStep[];
   weeklyReports: WeeklyReport[];
   maintenanceRecords: MaintenanceRecord[];
+  forecastHistory: ForecastHistoryEntry[];
 }
 
 export const db: Database = {
@@ -35,6 +43,7 @@ export const db: Database = {
   approvalSteps: [],
   weeklyReports: [],
   maintenanceRecords: [],
+  forecastHistory: [],
 };
 
 export const generateId = (): string => {

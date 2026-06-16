@@ -48,7 +48,7 @@ export const getUserById = (req: AuthRequest, res: Response) => {
 export const createUser = async (req: AuthRequest, res: Response) => {
   try {
     const validated = createUserSchema.parse(req.body);
-    const user = await userService.createUser(validated);
+    const user = await userService.createUser(validated as any);
     res.status(201).json(user);
   } catch (error: any) {
     if (error instanceof z.ZodError) {

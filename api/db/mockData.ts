@@ -12,15 +12,17 @@ import type {
   MaintenanceRecord,
 } from '../../shared/types.js';
 
-const provinces = [
-  '北京市', '天津市', '河北省', '山西省', '内蒙古自治区',
-  '辽宁省', '吉林省', '黑龙江省', '上海市', '江苏省',
-  '浙江省', '安徽省', '福建省', '江西省', '山东省',
-  '河南省', '湖北省', '湖南省', '广东省', '广西壮族自治区',
-  '海南省', '重庆市', '四川省', '贵州省', '云南省',
-  '西藏自治区', '陕西省', '甘肃省', '青海省', '宁夏回族自治区',
-  '新疆维吾尔自治区'
-];
+const regionMap: Record<string, string> = {
+  '北京市': '华北', '天津市': '华北', '河北省': '华北', '山西省': '华北', '内蒙古自治区': '华北',
+  '辽宁省': '东北', '吉林省': '东北', '黑龙江省': '东北',
+  '上海市': '华东', '江苏省': '华东', '浙江省': '华东', '安徽省': '华东', '福建省': '华东', '江西省': '华东', '山东省': '华东',
+  '河南省': '华中', '湖北省': '华中', '湖南省': '华中',
+  '广东省': '华南', '广西壮族自治区': '华南', '海南省': '华南',
+  '重庆市': '西南', '四川省': '西南', '贵州省': '西南', '云南省': '西南', '西藏自治区': '西南',
+  '陕西省': '西北', '甘肃省': '西北', '青海省': '西北', '宁夏回族自治区': '西北', '新疆维吾尔自治区': '西北'
+};
+
+const provinces = Object.keys(regionMap);
 
 const cityMap: Record<string, string[]> = {
   '北京市': ['北京市'],
@@ -153,6 +155,7 @@ const generatePlants = (): { plants: Plant[]; units: Unit[] } => {
         id: plantId,
         name: plantName,
         province,
+        region: regionMap[province] || '未知',
         city,
         address: `${city}XX区XX路${Math.floor(Math.random() * 1000)}号`,
         capacity: plantUnits.reduce((sum, u) => sum + u.capacity, 0),
@@ -281,6 +284,8 @@ const generateAlerts = (plants: Plant[], units: Unit[]): Alert[] => {
       level: isLevel2 ? 'level2' : 'level1',
       status: isActive ? (Math.random() > 0.5 ? 'active' : 'acknowledged') : 'resolved',
       message,
+      description: message,
+      timestamp: startTime.toISOString(),
       startTime: startTime.toISOString(),
       endTime: isActive ? undefined : new Date(startTime.getTime() + Math.random() * 2 * 60 * 60 * 1000).toISOString(),
       duration: Math.floor(Math.random() * 180) + 10,
@@ -303,12 +308,15 @@ const generateApprovals = (alerts: Alert[], users: User[]): Approval[] => {
     const epbUser = users.find(u => u.role === 'epb')!;
     
     const currentStep = Math.floor(Math.random() * 3) + 1;
+    const status1: 'approved' | 'pending' = currentStep > 1 ? 'approved' : 'pending';
+    const status2: 'approved' | 'pending' = currentStep > 2 ? 'approved' : 'pending';
+    const status3: 'approved' | 'pending' = 'pending';
     const steps = [
       {
         id: generateId(),
         step: 1,
         role: 'shift_supervisor' as const,
-        status: currentStep > 1 ? 'approved' : 'pending',
+        status: status1,
         approverId: currentStep > 1 ? shiftUser.id : undefined,
         approverName: currentStep > 1 ? shiftUser.name : undefined,
         comment: currentStep > 1 ? '情况属实，建议调整参数' : undefined,
@@ -318,7 +326,7 @@ const generateApprovals = (alerts: Alert[], users: User[]): Approval[] => {
         id: generateId(),
         step: 2,
         role: 'plant_manager' as const,
-        status: currentStep > 2 ? 'approved' : (currentStep === 2 ? 'pending' : 'pending'),
+        status: status2,
         approverId: currentStep > 2 ? managerUser.id : undefined,
         approverName: currentStep > 2 ? managerUser.name : undefined,
         comment: currentStep > 2 ? '同意调整，密切监控' : undefined,
@@ -328,7 +336,7 @@ const generateApprovals = (alerts: Alert[], users: User[]): Approval[] => {
         id: generateId(),
         step: 3,
         role: 'epb' as const,
-        status: currentStep === 3 ? 'pending' : 'pending',
+        status: status3,
         approverId: undefined,
         approverName: undefined,
         comment: undefined,

@@ -95,6 +95,7 @@ export const getPlantRanking = (metric: 'powerPerTon' | 'complianceRate' | 'avai
       plantId: plant.id,
       plantName: plant.name,
       province: plant.province,
+      region: plant.region,
       value: Number(value.toFixed(2)),
       rank: 0
     };

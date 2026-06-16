@@ -24,6 +24,7 @@ export interface Plant {
   id: string;
   name: string;
   province: string;
+  region: string;
   city: string;
   address: string;
   capacity: number;
@@ -78,6 +79,8 @@ export interface Alert {
   level: AlertLevel;
   status: AlertStatus;
   message: string;
+  description?: string;
+  timestamp: string;
   startTime: string;
   endTime?: string;
   duration: number;
@@ -85,6 +88,7 @@ export interface Alert {
   actualValue: number;
   handlerId?: string;
   handlerNote?: string;
+  details?: Record<string, any>;
 }
 
 export interface ApprovalStep {
@@ -168,6 +172,7 @@ export interface PlantRankingItem {
   plantId: string;
   plantName: string;
   province: string;
+  region: string;
   value: number;
   rank: number;
 }

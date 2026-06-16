@@ -1,7 +1,7 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import http from 'http';
 import { simulateRealtimeData, getCurrentRealtimeData } from './realtime.service.js';
-import { detectAlerts } from './alert.service.js';
+import { detectAlerts, checkAndCreateAvailabilityAlert } from './alert.service.js';
 import { db } from '../db/memoryStore.js';
 
 let io: SocketIOServer | null = null;
@@ -78,6 +78,19 @@ const startSimulation = () => {
       if (newAlerts.length > 0) {
         io?.to('alerts').emit('alerts:new', newAlerts);
       }
+      
+      const uniquePlantIds = new Set(allNewData.map(d => d.plantId));
+      uniquePlantIds.forEach(plantId => {
+        const { alert: availabilityAlert, approval: newApproval } = checkAndCreateAvailabilityAlert(plantId);
+        if (availabilityAlert && !newAlerts.find(a => a.id === availabilityAlert.id)) {
+          io?.to('alerts').emit('alerts:update', availabilityAlert);
+          io?.to(`plant:${plantId}`).emit('alerts:update', availabilityAlert);
+        }
+        if (newApproval) {
+          io?.to('alerts').emit('approvals:new', newApproval);
+          io?.to(`plant:${plantId}`).emit('approvals:new', newApproval);
+        }
+      });
     } catch (error) {
       console.error('Simulation error:', error);
     }

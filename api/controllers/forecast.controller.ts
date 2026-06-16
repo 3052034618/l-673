@@ -46,7 +46,7 @@ export const getGapForecast = (req: AuthRequest, res: Response) => {
       return res.status(403).json({ error: '无权限访问该工厂' });
     }
     
-    const forecast = forecastService.getGapForecast(plantId, region);
+    const forecast = forecastService.getGapForecast(plantId, 30, region);
     res.json(forecast);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -57,6 +57,7 @@ export const getOptimalTransportPlan = (req: AuthRequest, res: Response) => {
   try {
     const plantId = req.query.plantId as string;
     const targetDate = req.query.targetDate as string;
+    const region = req.query.region as string;
     
     if (!plantId) {
       return res.status(400).json({ error: '缺少plantId参数' });
@@ -66,7 +67,7 @@ export const getOptimalTransportPlan = (req: AuthRequest, res: Response) => {
       return res.status(403).json({ error: '无权限访问该工厂' });
     }
     
-    const plan = forecastService.getOptimalTransportPlan(plantId, targetDate);
+    const plan = forecastService.getOptimalTransportPlan(plantId, targetDate, region);
     res.json(plan);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -76,6 +77,7 @@ export const getOptimalTransportPlan = (req: AuthRequest, res: Response) => {
 export const getStandbyBoilerRecommendation = (req: AuthRequest, res: Response) => {
   try {
     const plantId = req.query.plantId as string;
+    const region = req.query.region as string;
     
     if (!plantId) {
       return res.status(400).json({ error: '缺少plantId参数' });
@@ -85,7 +87,7 @@ export const getStandbyBoilerRecommendation = (req: AuthRequest, res: Response) 
       return res.status(403).json({ error: '无权限访问该工厂' });
     }
     
-    const recommendation = forecastService.getStandbyBoilerRecommendation(plantId);
+    const recommendation = forecastService.getStandbyBoilerRecommendation(plantId, region);
     res.json(recommendation);
   } catch (error: any) {
     res.status(500).json({ error: error.message });

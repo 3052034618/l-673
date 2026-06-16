@@ -9,7 +9,7 @@ interface PermissionConfig {
   allowOwnRegion?: boolean;
 }
 
-export const requireRole = (config: PermissionConfig) => {
+export const requireRole = (config: PermissionConfig | UserRole[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     const user = req.user;
     
@@ -17,12 +17,15 @@ export const requireRole = (config: PermissionConfig) => {
       return res.status(401).json({ error: '未登录' });
     }
     
-    if (!config.roles.includes(user.role)) {
+    const roles = Array.isArray(config) ? config : config.roles;
+    const permissions = Array.isArray(config) ? undefined : config.permissions;
+    
+    if (!roles.includes(user.role)) {
       return res.status(403).json({ error: '权限不足' });
     }
     
-    if (config.permissions && config.permissions.length > 0) {
-      const hasPermission = config.permissions.some(p => 
+    if (permissions && permissions.length > 0) {
+      const hasPermission = permissions.some(p => 
         user.permissions.includes(p) || user.permissions.includes('all')
       );
       if (!hasPermission) {

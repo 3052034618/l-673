@@ -8,7 +8,7 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get('/', plantController.getAllPlants);
-router.get('/stats/province', plantController.getProvinceStats);
+router.get('/province-stats', plantController.getProvinceStats);
 router.get('/ranking', plantController.getPlantRanking);
 router.get('/province/:province', plantController.getPlantsByProvince);
 router.get('/:id', plantController.getPlantById);
